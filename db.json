@@ -1,0 +1,211 @@
+{
+  "users": [
+    {
+      "id": "u01",
+      "name": "Omar",
+      "email": "oemad3987@gmail.com",
+      "password": "Omar@2003",
+      "role": "admin"
+    }
+  ],
+  "products": {
+    "electronics": [
+      {
+        "id": "el01",
+        "category": "electronics",
+        "name": "Fan",
+        "price": 500,
+        "stock": 10,
+        "image": "https://img.freepik.com/premium-psd/fan-isolated-transparent-background_436336-2559.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      },
+      {
+        "id": "el02",
+        "category": "electronics",
+        "name": "Washing Machine",
+        "price": 3000,
+        "stock": 5,
+        "image": "https://img.freepik.com/premium-photo/white-washing-machine-with-laundry-basket-top_93675-188813.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      },
+      {
+        "id": "el03",
+        "category": "electronics",
+        "name": "Refrigerator",
+        "price": 4500,
+        "stock": 3,
+        "image": "https://img.freepik.com/free-psd/sleek-stainless-steel-french-door-refrigerator_632498-25850.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      },
+      {
+        "id": "el04",
+        "category": "electronics",
+        "name": "Television",
+        "price": 4000,
+        "stock": 4,
+        "image": "https://img.freepik.com/free-photo/view-computer-monitor-display_23-2150757311.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      },
+      {
+        "id": "el05",
+        "category": "electronics",
+        "name": "Laptop",
+        "price": 8000,
+        "stock": 6,
+        "image": "https://img.freepik.com/free-photo/still-life-books-versus-technology_23-2150062920.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      },
+      {
+        "id": "el06",
+        "category": "electronics",
+        "name": "Microwave",
+        "price": 1500,
+        "stock": 8,
+        "image": "https://img.freepik.com/premium-photo/metallic-microwave-oven-isolated-white-background-3d_505080-172.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      },
+      {
+        "id": "el07",
+        "category": "electronics",
+        "name": "Heater",
+        "price": 700,
+        "stock": 7,
+        "image": "https://img.freepik.com/premium-photo/tv-with-word-v-it_1340398-887.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      },
+      {
+        "id": "el08",
+        "category": "electronics",
+        "name": "Water Heater",
+        "price": 1200,
+        "stock": 5,
+        "image": "https://img.freepik.com/premium-photo/gas-boiler-water-heater-blue-wall-3d-rendering_1336671-48563.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      }
+    ],
+    "food": [
+      {
+        "id": "fo01",
+        "category": "food",
+        "name": "Rice",
+        "price": 50,
+        "stock": 100,
+        "image": "https://img.freepik.com/premium-psd/rice-sack-agriculture-product-mockup-wooden-table-with-rice-field_565839-148.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      },
+      {
+        "id": "fo02",
+        "category": "food",
+        "name": "Oil",
+        "price": 80,
+        "stock": 60,
+        "image": "https://img.freepik.com/free-vector/realistic-motor-oil-poster-ads-with-editable-text-canister-package-splashes-drops-engine-oil-illustration_1284-29513.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      },
+      {
+        "id": "fo03",
+        "category": "food",
+        "name": "Sugar",
+        "price": 40,
+        "stock": 70,
+        "image": "https://img.freepik.com/premium-photo/sugar-black-background_596794-307.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      },
+      {
+        "id": "fo04",
+        "category": "food",
+        "name": "Pasta",
+        "price": 30,
+        "stock": 90,
+        "image": "https://img.freepik.com/free-photo/fresh-pasta-with-hearty-bolognese-parmesan-cheese-generated-by-ai_188544-9469.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      },
+      {
+        "id": "fo05",
+        "category": "food",
+        "name": "Tea",
+        "price": 25,
+        "stock": 50,
+        "image": "https://img.freepik.com/premium-vector/paper-cut-poster-with-tea-plantation-vector-promo_8071-69565.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      },
+      {
+        "id": "fo06",
+        "category": "food",
+        "name": "Coffee",
+        "price": 60,
+        "stock": 40,
+        "image": "https://img.freepik.com/premium-psd/coffee-shop-drink-menu-promotion-social-media-instagram-post-banner-template-design_84443-972.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      },
+      {
+        "id": "fo07",
+        "category": "food",
+        "name": "Milk",
+        "price": 20,
+        "stock": 80,
+        "image": "https://img.freepik.com/free-vector/milk-advertising-realistic-poster_1284-26187.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      },
+      {
+        "id": "fo08",
+        "category": "food",
+        "name": "Juice",
+        "price": 15,
+        "stock": 100,
+        "image": "https://img.freepik.com/free-psd/organic-juice-poster-template_23-2148911046.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      }
+    ],
+    "home": [
+      {
+        "id": "ho01",
+        "category": "home",
+        "name": "Vacuum Cleaner",
+        "price": 2500,
+        "stock": 4,
+        "image": "https://img.freepik.com/free-vector/realistic-vector-icon-illustration-vacuum-cleaner-house-hold-appliances_134830-2424.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      },
+      {
+        "id": "ho02",
+        "category": "home",
+        "name": "Blender",
+        "price": 400,
+        "stock": 6,
+        "image": "https://img.freepik.com/premium-psd/powerful-metallic-silver-blender-with-sleek-design-smooth-blending-transparent-background_1059034-40329.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      },
+      {
+        "id": "ho03",
+        "category": "home",
+        "name": "Food Processor",
+        "price": 1200,
+        "stock": 5,
+        "image": "https://img.freepik.com/free-photo/metal-food-blender-close-up-with-fresh-exotic-tropic-fruits-it-kitchen-background-with-empty-space-blender-wooden-table-kitchen_639032-170.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      },
+      {
+        "id": "ho04",
+        "category": "home",
+        "name": "Mixer",
+        "price": 1500,
+        "stock": 3,
+        "image": "https://img.freepik.com/premium-photo/food-processor-isolated-white_461160-6878.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      },
+      {
+        "id": "ho05",
+        "category": "home",
+        "name": "Iron",
+        "price": 300,
+        "stock": 10,
+        "image": "https://img.freepik.com/free-vector/iron-ironing-realistic-icon-set-two-irons-are-different-positions-white-background-vector-illustration_1284-71341.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      },
+      {
+        "id": "ho06",
+        "category": "home",
+        "name": "Water Filter",
+        "price": 1000,
+        "stock": 4,
+        "image": "https://img.freepik.com/free-vector/water-filter-realistic-with-faucet-full-glass-vector-illustration_1284-76637.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      },
+      {
+        "id": "ho07",
+        "category": "home",
+        "name": "Kitchen Hood",
+        "price": 1300,
+        "stock": 2,
+        "image": "https://img.freepik.com/free-vector/gas-stove-with-oven-metal-cooker-hood_107791-3327.jpg?uid=R203518554&ga=GA1.1.293320878.1745160833&semt=ais_hybrid&w=740"
+      },
+      {
+        "id": "ho08",
+        "category": "home",
+        "name": "Meat Grinder",
+        "price": 900,
+        "stock": 5,
+        "image": "https://media.istockphoto.com/id/912665626/photo/kitchen-appliances-set-red-blender-toaster-coffee-machine-meat-ginder-food-mixer-and-coffee.jpg?s=1024x1024&w=is&k=20&c=eQx_NWO2V1XiI1EBh0xVKQfWP1x7PmoO2hx2_b5vy2E="
+      }
+    ]
+  }
+}
