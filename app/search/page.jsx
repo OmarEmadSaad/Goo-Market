@@ -1,10 +1,11 @@
+import { Suspense } from "react";
 import SearchPageContent from "./SearchPageContent";
 
 const Search = () => {
   return (
-    <div>
+    <Suspense>
       <SearchPageContent />
-    </div>
+    </Suspense>
   );
 };
 
