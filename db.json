@@ -5,7 +5,29 @@
       "name": "Omar",
       "email": "oemad3987@gmail.com",
       "password": "Omar@2003",
-      "role": "admin"
+      "role": "admin",
+      "cart": "",
+      "image": ""
+    },
+    {
+      "id": "7f49",
+      "userName": "OmarEmad",
+      "Email": "OmarEmad@gmail.com",
+      "password": "Omar@2003",
+      "gender": "Female",
+      "image": "https://res.cloudinary.com/dgdttpjci/image/upload/v1749496493/ndvd1f0y4igvejaqhp2w.png",
+      "role": "user",
+      "cart": []
+    },
+    {
+      "id": "5b60",
+      "userName": "Dr Omar",
+      "Email": "omar@gamil.com",
+      "password": "Omar@2589",
+      "gender": "Male",
+      "image": "https://res.cloudinary.com/dgdttpjci/image/upload/v1749496793/phblaisoztn6kmjliufc.png",
+      "role": "user",
+      "cart": ""
     }
   ],
   "products": {

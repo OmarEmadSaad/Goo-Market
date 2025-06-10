@@ -1,12 +1,12 @@
 "use client";
 
 import { Card, Typography, Button } from "@material-tailwind/react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { MdDelete } from "react-icons/md";
 import Swal from "sweetalert2";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchCart, updateCart } from "../ReduxSystem/cartSlice";
+import { fetchCart, setCartItems } from "../ReduxSystem/cartSlice";
 import Error from "../erro/page";
 import Loading from "../loding/page";
 
@@ -14,8 +14,13 @@ const Cart = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const { cartItems, status, error } = useSelector((state) => state.cart);
-  const userId =
-    typeof window !== "undefined" ? localStorage.getItem("userId") : null;
+  const [userId, setUserId] = useState(null);
+  const urlUser = process.env.NEXT_PUBLIC_USERS_URL;
+
+  useEffect(() => {
+    const id = localStorage.getItem("userId");
+    setUserId(id);
+  }, []);
 
   useEffect(() => {
     if (userId && status === "idle") {
@@ -33,25 +38,135 @@ const Cart = () => {
   const shipping = 0;
   const total = subtotal + taxes + shipping;
 
-  const handleDelete = (id) => {
-    const updatedCart = cartItems.filter((item) => item.id !== id);
-    dispatch(updateCart({ userId, cart: updatedCart }));
+  const handleDelete = async (id) => {
+    if (!userId) {
+      router.push("/login");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${urlUser}/${userId}`);
+      const user = await res.json();
+      const cart = Array.isArray(user.cart) ? user.cart : [];
+      const updatedCart = cart.filter((item) => item.id !== id);
+
+      await fetch(`${urlUser}/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cart: updatedCart }),
+      });
+
+      dispatch(setCartItems(updatedCart));
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: "Failed to delete item from cart",
+        icon: "error",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
   };
 
-  const handleIncrease = (id) => {
-    const updatedCart = cartItems.map((item) =>
-      item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-    );
-    dispatch(updateCart({ userId, cart: updatedCart }));
+  const handleIncrement = async (id) => {
+    if (!userId) {
+      router.push("/login");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${urlUser}/${userId}`);
+      const user = await res.json();
+      const cart = Array.isArray(user.cart) ? user.cart : [];
+      const updatedCart = cart.map((item) =>
+        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+      );
+
+      await fetch(`${urlUser}/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cart: updatedCart }),
+      });
+
+      dispatch(setCartItems(updatedCart));
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: "Failed to update quantity",
+        icon: "error",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
   };
 
-  const handleDecrease = (id) => {
-    const updatedCart = cartItems.map((item) =>
-      item.id === id && item.quantity > 1
-        ? { ...item, quantity: item.quantity - 1 }
-        : item
-    );
-    dispatch(updateCart({ userId, cart: updatedCart }));
+  const handleDecrement = async (id) => {
+    if (!userId) {
+      router.push("/login");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${urlUser}/${userId}`);
+      const user = await res.json();
+      const cart = Array.isArray(user.cart) ? user.cart : [];
+      const updatedCart = cart.map((item) =>
+        item.id === id && item.quantity > 1
+          ? { ...item, quantity: item.quantity - 1 }
+          : item
+      );
+
+      await fetch(`${urlUser}/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cart: updatedCart }),
+      });
+
+      dispatch(setCartItems(updatedCart));
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: "Failed to update quantity",
+        icon: "error",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  const handleCheckout = async () => {
+    if (!userId) {
+      router.push("/login");
+      return;
+    }
+
+    try {
+      await fetch(`${urlUser}/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cart: [] }),
+      });
+
+      dispatch(setCartItems([]));
+      Swal.fire({
+        title: "Payment Successful",
+        text: "Thank you for shopping with us!",
+        icon: "success",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }).then(() => {
+        router.push("/");
+      });
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: "Failed to process checkout",
+        icon: "error",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
   };
 
   if (status === "loading") {
@@ -63,7 +178,7 @@ const Cart = () => {
   }
 
   return (
-    <div className="flex flex-col md:flex-row justify-between items-start gap-10 p-6 min-h-screen">
+    <div className="flex flex-col md:flex-row justify-between items-start gap-10 p-6 min-h-screen dark:bg-[#03001C] dark:text-white">
       <div className="w-full md:w-2/3 text-center">
         <Typography variant="h4" color="green" className="mb-6">
           Shopping Cart
@@ -72,7 +187,7 @@ const Cart = () => {
         {isEmpty ? (
           <div className="text-center mt-20">
             <img
-              src="https://mfashionio.vercel.app/assets/img/cart/undraw_empty_cart_co35.svg"
+              src="https://goomarket.vercel.app/assets/shopping_cart-b0846037.png"
               alt="Empty Cart"
               className="mx-auto w-40 mb-6"
             />
@@ -89,17 +204,17 @@ const Cart = () => {
         ) : (
           cartItems.map(({ id, name, price, image, quantity }, index) => (
             <div
-              key={index}
+              key={id || index}
               className="flex items-center justify-between border-b py-4 gap-4 overflow-x-auto flex-nowrap"
             >
               <div className="flex items-center gap-4 min-w-[180px] shrink-0">
                 <img
                   src={image}
-                  alt="Product"
+                  alt={name || "Product"}
                   className="w-16 h-16 object-cover"
                 />
                 <h1 className="font-semibold text-sm md:text-base">
-                  {name.slice(0, 10)}
+                  {name ? name.slice(0, 20) : "Product"}...
                 </h1>
               </div>
 
@@ -114,14 +229,17 @@ const Cart = () => {
                 <h1 className="text-sm text-gray-500">Quantity</h1>
                 <div className="flex items-center gap-2 mt-1">
                   <button
-                    onClick={() => handleDecrease(id)}
+                    type="button"
+                    onClick={() => handleDecrement(id)}
                     className="w-8 h-8 border rounded"
+                    disabled={quantity <= 1}
                   >
                     -
                   </button>
                   <p className="w-8 text-center">{quantity}</p>
                   <button
-                    onClick={() => handleIncrease(id)}
+                    type="button"
+                    onClick={() => handleIncrement(id)}
                     className="w-8 h-8 border rounded"
                   >
                     +
@@ -134,10 +252,11 @@ const Cart = () => {
                   EGP {(price * quantity).toFixed(2)}
                 </p>
                 <button
+                  type="button"
                   onClick={() => handleDelete(id)}
-                  className="text-red-500 hover:text-red-700"
+                  className="text-red-600 hover:text-red-800"
                 >
-                  <MdDelete size={20} />
+                  <MdDelete size={24} />
                 </button>
               </div>
             </div>
@@ -145,7 +264,7 @@ const Cart = () => {
         )}
       </div>
 
-      <Card className="w-full md:w-1/3 p-6">
+      <Card className="w-full md:w-1/3 p-6 dark:bg-[#0B2447] dark:text-white">
         <Typography variant="h5" className="mb-4">
           Summary
         </Typography>
@@ -171,24 +290,8 @@ const Cart = () => {
         <Button
           color="green"
           fullWidth
-          onClick={() => {
-            if (!userId) {
-              router.push("/login");
-              return;
-            }
-
-            Swal.fire({
-              title: "Payment Successful",
-              text: "Thank you for shopping with us!",
-              icon: "success",
-              timer: 1500,
-              timerProgressBar: true,
-              showConfirmButton: false,
-            }).then(() => {
-              dispatch(updateCart({ userId, cart: [] }));
-              router.push("/");
-            });
-          }}
+          onClick={handleCheckout}
+          disabled={isEmpty || status === "loading"}
         >
           Checkout
         </Button>

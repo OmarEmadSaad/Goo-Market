@@ -9,16 +9,74 @@ import {
   Option,
   Avatar,
 } from "@material-tailwind/react";
-import Link from "next/link";
+import { useActionState, useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useRouter } from "next/navigation";
+import { addNewUsers } from "./RegisterAction";
 
 const DEFAULT_PHOTO_URL =
   "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4Avj4TSMtuTPrA1IqGtlWogrd6D3aZhVwCA98c3NC442QLQU0rmqWv7M&s";
 
 const Register = () => {
+  const [state, formAction, isPending] = useActionState(addNewUsers, {
+    errors: {},
+    success: false,
+    message: "",
+    userId: null,
+  });
+
+  const [previewURL, setPreviewURL] = useState(DEFAULT_PHOTO_URL);
+  const [gender, setGender] = useState("");
+
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.message) {
+      if (state.success) {
+        toast.success(state.message, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          onClose: () => router.push("/login"),
+        });
+      } else {
+        const errorMessages = Object.values(state.errors)
+          .filter(Boolean)
+          .join(" ");
+        const message = errorMessages || state.message;
+        toast.error(message, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
+    }
+  }, [state]);
+
+  const handleFileInputChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPreviewURL(URL.createObjectURL(file));
+    } else {
+      setPreviewURL(DEFAULT_PHOTO_URL);
+    }
+  };
+
+  const handleGenderChange = (value) => {
+    setGender(value);
+  };
+
   return (
     <section className="px-5 xl:px-0 min-h-screen flex items-center justify-center">
-      <div className="mx-auto max-w-[1170px] w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="mx-auto max-w-[1170px] w-full ">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 ">
           <div className="hidden lg:block overflow-hidden rounded-l-lg">
             <video
               className="w-full h-full object-cover rounded-l-lg"
@@ -37,58 +95,80 @@ const Register = () => {
             shadow={false}
           >
             <Typography variant="h3" color="blue-gray" className="mb-10">
-              Create <span className="text-blue-500">Account</span>
+              Create <span className="text-green-500">Account</span>
             </Typography>
 
-            <form className="flex flex-col gap-4">
-              <Input
-                name="name"
-                type="text"
-                label="Full Name"
-                size="lg"
-                color="green"
-              />
-              <Input
-                name="email"
-                type="email"
-                label="Email"
-                size="lg"
-                color="green"
-              />
-              <Input
-                name="password"
-                type="password"
-                label="Password"
-                size="lg"
-                color="green"
-              />
+            <form
+              action={(formData) => {
+                formAction({ formData });
+              }}
+              className="flex flex-col gap-4"
+            >
+              <div>
+                <Input
+                  name="name"
+                  type="text"
+                  label="Full Name"
+                  size="lg"
+                  color="green"
+                />
+                {state.errors?.name && (
+                  <Typography color="red" className="text-sm mt-1">
+                    {state.errors.name}
+                  </Typography>
+                )}
+              </div>
+
+              <div>
+                <Input
+                  name="email"
+                  type="email"
+                  label={state.errors?.email ? state.errors.email : "Email"}
+                  size="lg"
+                  color="green"
+                  className={state.errors?.email ? "border-red-500" : ""}
+                />
+              </div>
+
+              <div>
+                <Input
+                  name="password"
+                  type="password"
+                  label="Password"
+                  size="lg"
+                  color="green"
+                />
+                {state.errors?.password && (
+                  <Typography color="red" className="text-sm mt-1">
+                    {state.errors.password}
+                  </Typography>
+                )}
+              </div>
 
               <div className="mb-4 flex flex-col md:flex-row gap-4">
                 <div className="w-full md:w-1/2">
-                  <Typography variant="small" className="mb-2 font-bold">
-                    Gender:
-                  </Typography>
-                  <Select name="gender" label="Select Gender" color="green">
+                  <Select
+                    label="Select Gender"
+                    color="green"
+                    value={gender}
+                    onChange={handleGenderChange}
+                  >
                     <Option value="">Select</Option>
                     <Option value="Male">Male</Option>
                     <Option value="Female">Female</Option>
                   </Select>
+                  <input type="hidden" name="gender" value={gender} />
+                  {state.errors?.gender && (
+                    <Typography color="red" className="text-sm mt-1">
+                      {state.errors.gender}
+                    </Typography>
+                  )}
                 </div>
-              </div>
-
-              <div className="hidden" id="specialization-field">
-                <Input
-                  name="specialization"
-                  type="text"
-                  label="Specialization (for doctors)"
-                  size="lg"
-                  color="green"
-                />
               </div>
 
               <div className="flex items-center gap-3">
                 <Avatar
-                  src={DEFAULT_PHOTO_URL}
+                  src={previewURL}
                   alt="Avatar"
                   size="lg"
                   className="border-2 border-green-500"
@@ -100,12 +180,19 @@ const Register = () => {
                     id="customFile"
                     accept=".jpg, .png"
                     className="hidden"
+                    onChange={handleFileInputChange}
                   />
                   <label
                     htmlFor="customFile"
                     className="absolute top-0 left-0 w-full h-full flex items-center justify-center px-4 py-2 text-sm font-semibold text-blue-gray-900 bg-green-100 rounded-lg cursor-pointer hover:bg-green-200"
                   >
-                    Upload Photo
+                    {state.errors?.photo ? (
+                      <Typography color="red" className="text-sm text-center">
+                        {state.errors.photo}
+                      </Typography>
+                    ) : (
+                      "Upload Photo"
+                    )}
                   </label>
                 </div>
               </div>
@@ -116,20 +203,25 @@ const Register = () => {
                 fullWidth
                 type="submit"
                 className="mt-4"
+                disabled={isPending}
               >
-                Register
+                {isPending ? "Registering..." : "Register"}
               </Button>
 
               <Typography className="mt-3 text-center">
                 Already have an account?{" "}
-                <Link href="/login" className="text-blue-500 font-medium">
+                <span
+                  onClick={() => router.push("/login")}
+                  className="text-green-600 font-medium cursor-pointer"
+                >
                   Login
-                </Link>
+                </span>
               </Typography>
             </form>
           </Card>
         </div>
       </div>
+      <ToastContainer />
     </section>
   );
 };
