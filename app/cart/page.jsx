@@ -205,7 +205,7 @@ const Cart = () => {
           cartItems.map(({ id, name, price, image, quantity }, index) => (
             <div
               key={id || index}
-              className="flex items-center justify-between border-b py-4 gap-4 overflow-x-auto flex-nowrap"
+              className="flex items-center justify-between border-b py-4 gap-4 overflow-x-auto flex-nowrap "
             >
               <div className="flex items-center gap-4 min-w-[180px] shrink-0">
                 <img
@@ -214,7 +214,7 @@ const Cart = () => {
                   className="w-16 h-16 object-cover"
                 />
                 <h1 className="font-semibold text-sm md:text-base">
-                  {name ? name.slice(0, 20) : "Product"}...
+                  {name ? name.slice(0, 20) : "Product"}
                 </h1>
               </div>
 

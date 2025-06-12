@@ -9,7 +9,7 @@ import {
 import ShowDetailsButton from "./ShowDetailsButton";
 
 export const metadata = {
-  title: "Card Product",
+  title: "Product card",
   description: "Product card of GooMarket",
 };
 

@@ -119,10 +119,8 @@ export default function ProductDetailsClient({ product }) {
   return (
     <div className="p-8 flex flex-col md:flex-row gap-6 items-center min-h-screen justify-center dark:bg-[#03001C] dark:text-white">
       <div className="w-80">
-        <Image
+        <img
           loading="lazy"
-          width={850}
-          height={750}
           src={product.image}
           alt={product.name}
           className="rounded shadow-md"

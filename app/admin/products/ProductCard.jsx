@@ -9,7 +9,6 @@ import {
 } from "@material-tailwind/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
 import Loading from "@/app/loding/page";
 
 const ProductCard = () => {

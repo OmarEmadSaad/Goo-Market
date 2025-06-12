@@ -279,7 +279,8 @@ const Header = () => {
                     }
                     alt={currentUser?.name || "User"}
                     size="sm"
-                    className="border border-white inline-block"
+                    onClick={() => router.push("/profile")}
+                    className="border border-white inline-block hover:cursor-pointer"
                     placeholder={
                       currentUser?.name?.charAt(0).toUpperCase() || "?"
                     }

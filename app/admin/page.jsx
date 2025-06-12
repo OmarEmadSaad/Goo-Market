@@ -1,5 +1,10 @@
-import ProductCard from "./product/ProductCard";
+import ProductCard from "./products/ProductCard";
 import UserCard from "./users/UserCard";
+
+export const metadata = {
+  title: "Dashbord",
+  description: "admin system for products , users",
+};
 
 const Dashboard = () => {
   return (

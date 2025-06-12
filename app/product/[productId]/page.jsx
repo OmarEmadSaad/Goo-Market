@@ -1,4 +1,8 @@
 import ProductDetailsClient from "../ProductDetailsClient";
+export const metadata = {
+  title: "Products Details",
+  description: "Details for any products",
+};
 
 export default async function ProductDetails({ params: { productId } }) {
   let product = null;
