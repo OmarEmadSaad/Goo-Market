@@ -12,7 +12,7 @@ const LoginForm = () => {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { users, status, error } = useSelector((state) => state.users);
+  const { users, status } = useSelector((state) => state.users);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -45,6 +45,10 @@ const LoginForm = () => {
 
     if (matchedUser) {
       await dispatch(setUserId(matchedUser.id)).unwrap();
+
+      // ✅ حفظ userId في الكوكيز
+      document.cookie = `auth-token=${matchedUser.id}; path=/; max-age=86400`; // صالح ليوم كامل
+
       toast.success("Login successful");
       router.push("/");
     } else {
