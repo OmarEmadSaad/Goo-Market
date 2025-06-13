@@ -91,10 +91,10 @@ const Register = () => {
           </div>
 
           <Card
-            className="rounded-none lg:rounded-r-lg lg:pl-16 py-10"
+            className="rounded-none lg:rounded-r-lg lg:pl-16 py-10 dark:bg-[#0B2447] dark:text-[#93B1A6]"
             shadow={false}
           >
-            <Typography variant="h3" color="blue-gray" className="mb-10">
+            <Typography variant="h3" color="balck" className="mb-10">
               Create <span className="text-green-500">Account</span>
             </Typography>
 
@@ -102,7 +102,7 @@ const Register = () => {
               action={(formData) => {
                 formAction({ formData });
               }}
-              className="flex flex-col gap-4"
+              className="flex flex-col gap-4 dark:text-[#93B1A6]"
             >
               <div>
                 <Input
@@ -111,6 +111,7 @@ const Register = () => {
                   label="Full Name"
                   size="lg"
                   color="green"
+                  className="dark:text-[#93B1A6]"
                 />
                 {state.errors?.name && (
                   <Typography color="red" className="text-sm mt-1">
@@ -126,7 +127,11 @@ const Register = () => {
                   label={state.errors?.email ? state.errors.email : "Email"}
                   size="lg"
                   color="green"
-                  className={state.errors?.email ? "border-red-500" : ""}
+                  className={
+                    state.errors?.email
+                      ? "border-red-500"
+                      : "dark:text-[#93B1A6]"
+                  }
                 />
               </div>
 
@@ -137,6 +142,7 @@ const Register = () => {
                   label="Password"
                   size="lg"
                   color="green"
+                  className="dark:text-[#93B1A6]"
                 />
                 {state.errors?.password && (
                   <Typography color="red" className="text-sm mt-1">
@@ -152,12 +158,18 @@ const Register = () => {
                     color="green"
                     value={gender}
                     onChange={handleGenderChange}
+                    className="dark:text-[#93B1A6]"
                   >
                     <Option value="">Select</Option>
                     <Option value="Male">Male</Option>
                     <Option value="Female">Female</Option>
                   </Select>
-                  <input type="hidden" name="gender" value={gender} />
+                  <input
+                    type="hidden"
+                    name="gender"
+                    value={gender}
+                    className="dark:text-[#93B1A6]"
+                  />
                   {state.errors?.gender && (
                     <Typography color="red" className="text-sm mt-1">
                       {state.errors.gender}

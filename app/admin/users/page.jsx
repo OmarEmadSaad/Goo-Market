@@ -1,8 +1,10 @@
 "use client";
+
 import { Card, Typography, Button } from "@material-tailwind/react";
 import Swal from "sweetalert2";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
 import Loading from "@/app/loding/page";
 
 const TABLE_HEAD = [
@@ -20,44 +22,39 @@ const UsersTable = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userId, setUserId] = useState(null);
-
-  useEffect(() => {
-    const storedUserId = localStorage.getItem("userId");
-    setUserId(storedUserId);
-  }, []);
 
   const getUsers = async () => {
     setLoading(true);
     setError(null);
     try {
+      const currentUserId = Cookies.get("auth-token");
       const response = await axios.get(urlUser);
       const data = Array.isArray(response.data)
         ? response.data
         : response.data.users || [];
+
       if (data.length === 0) {
         setError("No users found in API response.");
         setUsers([]);
         return;
       }
+
       const filteredUsers = data.filter((user) => {
-        const isCurrentUser = String(user.id) === String(userId);
-        return !isCurrentUser;
+        return String(user.id) !== String(currentUserId) && user.id !== 1;
       });
-      const validatedUsers = filteredUsers.map((user) => {
-        const mappedUser = {
-          id: user.id || null,
-          name: user.name || user.userName || user.username || "N/A",
-          gender: user.gender || "N/A",
-          email: user.email || user.Email || user.emailAddress || "N/A",
-          role: user.role || "user",
-          image:
-            user.image ||
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4Avj4TSMtuTPrA1IqGtlWogrd6D3aZhVwCA98c3NC442QLQU0rmqWv7M&s",
-          cartItems: Array.isArray(user.cart) ? user.cart.length : 0,
-        };
-        return mappedUser;
-      });
+
+      const validatedUsers = filteredUsers.map((user) => ({
+        id: user.id || null,
+        name: user.name || user.userName || user.username || "N/A",
+        gender: user.gender || "N/A",
+        email: user.email || user.Email || user.emailAddress || "N/A",
+        role: user.role || "user",
+        image:
+          user.image ||
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4Avj4TSMtuTPrA1IqGtlWogrd6D3aZhVwCA98c3NC442QLQU0rmqWv7M&s",
+        cartItems: Array.isArray(user.cart) ? user.cart.length : 0,
+      }));
+
       setUsers(validatedUsers);
       if (validatedUsers.length === 0) {
         setError("No users found after filtering.");
@@ -72,10 +69,8 @@ const UsersTable = () => {
   };
 
   useEffect(() => {
-    if (userId !== null) {
-      getUsers();
-    }
-  }, [userId]);
+    getUsers();
+  }, []);
 
   const makeAdmin = async (id) => {
     if (!id) {
@@ -220,7 +215,6 @@ const UsersTable = () => {
                               size="sm"
                               color="red"
                               onClick={() => demoteToUser(id)}
-                              disabled={!id}
                             >
                               Demote to User
                             </Button>
@@ -229,7 +223,6 @@ const UsersTable = () => {
                               size="sm"
                               color="yellow"
                               onClick={() => makeAdmin(id)}
-                              disabled={!id}
                             >
                               Promote to Admin
                             </Button>

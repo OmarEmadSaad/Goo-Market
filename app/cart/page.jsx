@@ -14,13 +14,8 @@ const Cart = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const { cartItems, status, error } = useSelector((state) => state.cart);
-  const [userId, setUserId] = useState(null);
   const urlUser = process.env.NEXT_PUBLIC_USERS_URL;
-
-  useEffect(() => {
-    const id = localStorage.getItem("userId");
-    setUserId(id);
-  }, []);
+  const userId = useSelector((state) => state.auth.userId);
 
   useEffect(() => {
     if (userId && status === "idle") {

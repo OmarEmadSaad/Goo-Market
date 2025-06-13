@@ -2,7 +2,6 @@ import uploadImageToCloudinary from "../components/uploadCloudinary";
 
 const USERS_API = process.env.NEXT_PUBLIC_USERS_URL;
 
-// UUID Generator
 const generateUUID = () =>
   "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;

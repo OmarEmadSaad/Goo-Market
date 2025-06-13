@@ -247,7 +247,7 @@ const AddProducts = () => {
             onClick={handleAddProduct}
             disabled={uploading}
             className={`px-4 py-2 bg-green-500 text-white rounded-md ${
-              uploading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-600"
+              uploading ? "opacity-50 cursor-not-allowed" : "hover:bg-green-600"
             }`}
           >
             {uploading ? "Uploading..." : "Add Product"}

@@ -23,7 +23,9 @@ import Error from "../erro/page";
 import Loading from "../loding/page";
 import { useRouter } from "next/navigation";
 import { fetchProducts } from "../ReduxSystem/productSlice";
-import { fetchUsers, setUserId } from "../ReduxSystem/usersSlice";
+import { fetchUsers } from "../ReduxSystem/usersSlice";
+import { setUserId } from "../ReduxSystem/authSlice";
+import { clearCart } from "../ReduxSystem/cartSlice";
 
 const Header = () => {
   const [openMenu, setOpenMenu] = useState(false);
@@ -41,10 +43,11 @@ const Header = () => {
   } = useSelector((state) => state.products);
   const {
     users,
-    userId,
     status: userStatus,
     error: userError,
   } = useSelector((state) => state.users);
+  const { userId } = useSelector((state) => state.auth);
+
   const cartItems = useSelector((state) => state.cart.cartItems);
   const cartCount = cartItems?.length || 0;
 
@@ -88,6 +91,8 @@ const Header = () => {
 
   const handleLogout = () => {
     dispatch(setUserId(null));
+    dispatch(clearCart());
+
     router.push("/login");
   };
 

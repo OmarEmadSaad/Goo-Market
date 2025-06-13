@@ -1,4 +1,3 @@
-// middleware.js
 import { NextResponse } from "next/server";
 
 const USERS_URL = process.env.NEXT_PUBLIC_USERS_URL;
@@ -24,7 +23,6 @@ export async function middleware(request) {
   return NextResponse.next();
 }
 
-// صفحة مخصصة للرفض
 function showAccessDeniedPage() {
   const html = `
     <!DOCTYPE html>

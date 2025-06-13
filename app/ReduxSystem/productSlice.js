@@ -10,6 +10,7 @@ export const fetchProducts = createAsyncThunk(
           `Failed to fetch products: ${res.status} ${res.statusText}`
         );
       }
+
       const data = await res.json();
       if (!Array.isArray(data)) {
         throw new Error("API response is not an array");

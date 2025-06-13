@@ -5,13 +5,16 @@ import Swal from "sweetalert2";
 import Loading from "../loding/page";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { updateCart, fetchCart } from "../ReduxSystem/cartSlice";
+import { updateCart } from "../ReduxSystem/cartSlice";
 import Image from "next/image";
 
 export default function ProductDetailsClient({ product }) {
   const router = useRouter();
   const dispatch = useDispatch();
+
   const { cartItems } = useSelector((state) => state.cart);
+  const { userId } = useSelector((state) => state.auth);
+
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
 
@@ -21,8 +24,6 @@ export default function ProductDetailsClient({ product }) {
   const handleDecrement = () => setQuantity(quantity > 1 ? quantity - 1 : 1);
 
   const handleBuyNow = async () => {
-    const userId = localStorage.getItem("userId");
-
     if (!userId) {
       const result = await Swal.fire({
         icon: "warning",
@@ -47,8 +48,6 @@ export default function ProductDetailsClient({ product }) {
   };
 
   const handleAddToCart = async () => {
-    const userId = localStorage.getItem("userId");
-
     if (!userId) {
       const result = await Swal.fire({
         icon: "warning",
@@ -126,7 +125,7 @@ export default function ProductDetailsClient({ product }) {
           className="rounded shadow-md"
         />
         <div className="flex justify-center gap-4 mt-4">
-          {[...Array(3)].map((y, i) => (
+          {[...Array(3)].map((_, i) => (
             <img
               key={i}
               src={product.image}

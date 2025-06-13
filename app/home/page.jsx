@@ -53,8 +53,8 @@ const Home = () => {
               <Swiper
                 className="w-full"
                 spaceBetween={50}
-                slidesPerView={1}
-                centeredSlides={true}
+                slidesPerView={1.5}
+                centeredSlides={false}
                 breakpoints={{
                   640: { slidesPerView: 2, centeredSlides: false },
                   768: { slidesPerView: 3, centeredSlides: false },
