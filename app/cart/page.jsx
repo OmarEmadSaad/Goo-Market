@@ -1,20 +1,20 @@
 "use client";
 
 import { Card, Typography, Button } from "@material-tailwind/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { MdDelete } from "react-icons/md";
 import Swal from "sweetalert2";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchCart, setCartItems } from "../ReduxSystem/cartSlice";
+import { fetchCart, updateCart } from "../ReduxSystem/cartSlice";
 import Error from "../erro/page";
 import Loading from "../loding/page";
+import { updateProductQuantity } from "@/firebase/utils/utils";
 
 const Cart = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const { cartItems, status, error } = useSelector((state) => state.cart);
-  const urlUser = process.env.NEXT_PUBLIC_USERS_URL;
   const userId = useSelector((state) => state.auth.userId);
 
   useEffect(() => {
@@ -40,18 +40,8 @@ const Cart = () => {
     }
 
     try {
-      const res = await fetch(`${urlUser}/${userId}`);
-      const user = await res.json();
-      const cart = Array.isArray(user.cart) ? user.cart : [];
-      const updatedCart = cart.filter((item) => item.id !== id);
-
-      await fetch(`${urlUser}/${userId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cart: updatedCart }),
-      });
-
-      dispatch(setCartItems(updatedCart));
+      const updatedCart = cartItems.filter((item) => item.id !== id);
+      await dispatch(updateCart({ userId, cart: updatedCart })).unwrap();
     } catch (error) {
       Swal.fire({
         title: "Error",
@@ -70,20 +60,15 @@ const Cart = () => {
     }
 
     try {
-      const res = await fetch(`${urlUser}/${userId}`);
-      const user = await res.json();
-      const cart = Array.isArray(user.cart) ? user.cart : [];
-      const updatedCart = cart.map((item) =>
+      const updatedCart = cartItems.map((item) =>
         item.id === id ? { ...item, quantity: item.quantity + 1 } : item
       );
+      await dispatch(updateCart({ userId, cart: updatedCart })).unwrap();
 
-      await fetch(`${urlUser}/${userId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cart: updatedCart }),
-      });
-
-      dispatch(setCartItems(updatedCart));
+      const itemToUpdate = updatedCart.find((item) => item.id === id);
+      if (itemToUpdate) {
+        await updateProductQuantity(id, itemToUpdate.quantity);
+      }
     } catch (error) {
       Swal.fire({
         title: "Error",
@@ -102,22 +87,17 @@ const Cart = () => {
     }
 
     try {
-      const res = await fetch(`${urlUser}/${userId}`);
-      const user = await res.json();
-      const cart = Array.isArray(user.cart) ? user.cart : [];
-      const updatedCart = cart.map((item) =>
+      const updatedCart = cartItems.map((item) =>
         item.id === id && item.quantity > 1
           ? { ...item, quantity: item.quantity - 1 }
           : item
       );
+      await dispatch(updateCart({ userId, cart: updatedCart })).unwrap();
 
-      await fetch(`${urlUser}/${userId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cart: updatedCart }),
-      });
-
-      dispatch(setCartItems(updatedCart));
+      const itemToUpdate = updatedCart.find((item) => item.id === id);
+      if (itemToUpdate) {
+        await updateProductQuantity(id, itemToUpdate.quantity);
+      }
     } catch (error) {
       Swal.fire({
         title: "Error",
@@ -136,13 +116,7 @@ const Cart = () => {
     }
 
     try {
-      await fetch(`${urlUser}/${userId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cart: [] }),
-      });
-
-      dispatch(setCartItems([]));
+      await dispatch(updateCart({ userId, cart: [] })).unwrap();
       Swal.fire({
         title: "Payment Successful",
         text: "Thank you for shopping with us!",

@@ -1,15 +1,23 @@
-import uploadImageToCloudinary from "../components/uploadCloudinary";
-
 const USERS_API = process.env.NEXT_PUBLIC_USERS_URL;
 
-const generateUUID = () =>
-  "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === "x" ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
+const uploadImageToCloudinary = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", process.env.NEXT_PUBLIC_UPLOAD_PRESET);
+  formData.append("cloud_name", process.env.NEXT_PUBLIC_CLOUD_NAME);
 
-export const addNewUsers = async (prev, { formData, users }) => {
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUD_NAME}/image/upload`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+  const data = await res.json();
+  return data.secure_url;
+};
+
+export const addNewUsers = async (prev, { formData }) => {
   const name = formData.get("name")?.trim();
   const email = formData.get("email")?.trim();
   const password = formData.get("password")?.trim();
@@ -40,26 +48,18 @@ export const addNewUsers = async (prev, { formData, users }) => {
     errors.photo = "Only JPG and PNG images are allowed.";
   }
 
-  let usersData = users?.users;
-  if (!usersData) {
-    try {
-      const res = await fetch(USERS_API);
-      if (!res.ok) throw new Error("Failed to fetch users data.");
-      usersData = await res.json();
-    } catch (error) {
-      console.error("User fetch error:", error);
-      return {
-        errors: {},
-        success: false,
-        message: "Failed to check email availability. Please try again later.",
-      };
-    }
+  let existingUsers = {};
+  try {
+    const res = await fetch(USERS_API);
+    if (res.ok) existingUsers = await res.json();
+  } catch (err) {
+    console.error("Fetching users failed:", err);
   }
 
-  const emailExists = usersData.find(
+  const emailExists = Object.values(existingUsers || {}).some(
     (u) =>
-      u.email?.toLowerCase() === email.toLowerCase() ||
-      u.Email?.toLowerCase() === email.toLowerCase()
+      u.Email?.toLowerCase() === email.toLowerCase() ||
+      u.email?.toLowerCase() === email.toLowerCase()
   );
   if (emailExists) {
     errors.email = "This email is already registered.";
@@ -77,12 +77,12 @@ export const addNewUsers = async (prev, { formData, users }) => {
   if (photo) {
     try {
       imageUrl = await uploadImageToCloudinary(photo);
-    } catch (error) {
-      console.error("Cloudinary upload error:", error);
-      imageUrl = "";
+    } catch (err) {
+      console.error("Image upload failed:", err);
     }
   }
 
+  const userIndex = Object.keys(existingUsers).length;
   const newUser = {
     userName: name,
     Email: email,
@@ -91,44 +91,37 @@ export const addNewUsers = async (prev, { formData, users }) => {
     image: imageUrl,
     role: "user",
     cart: "",
+    id: Math.random().toString(36).substr(2, 4),
   };
 
   try {
+    const updatedUsers = {
+      ...existingUsers,
+      [userIndex]: newUser,
+    };
+
     const response = await fetch(USERS_API, {
-      method: "POST",
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newUser),
+      body: JSON.stringify(updatedUsers),
     });
 
-    const responseText = await response.text();
-    let responseData;
-
-    try {
-      responseData = JSON.parse(responseText);
-    } catch (error) {
-      throw new Error(`Invalid server response: ${responseText}`);
-    }
-
     if (!response.ok) {
-      throw new Error(
-        responseData.message || "Failed to register. Please try again."
-      );
+      throw new Error("Failed to save user data.");
     }
-
-    const userId = responseData.id || generateUUID();
 
     return {
       errors: {},
       success: true,
       message: "User registered successfully!",
-      userId,
+      userId: newUser.id,
     };
-  } catch (error) {
-    console.error("Registration error:", error);
+  } catch (err) {
+    console.error("Saving user failed:", err);
     return {
       errors: {},
       success: false,
-      message: error.message || "Registration failed. Try again.",
+      message: err.message || "Failed to save user.",
     };
   }
 };

@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 export const fetchUsers = createAsyncThunk("users/fetchUsers", async () => {
-  const res = await fetch(process.env.NEXT_PUBLIC_USERS_URL);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/users.json`);
   if (!res.ok) throw new Error("Failed to fetch users");
   const data = await res.json();
   return data;
@@ -11,7 +11,9 @@ export const fetchUser = createAsyncThunk(
   "users/fetchUser",
   async (id, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_USERS_URL}/${id}`);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/${id}.json`
+      );
       if (!res.ok) {
         const errorData = await res.json();
         return rejectWithValue(
@@ -29,13 +31,16 @@ export const fetchUser = createAsyncThunk(
 export const updateUser = createAsyncThunk(
   "users/updateUser",
   async ({ id, userData }) => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_USERS_URL}/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(userData),
-    });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/users/${id}.json`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      }
+    );
     if (!res.ok) {
       const errorData = await res.json();
       throw new Error(errorData.message || "Failed to update user");
@@ -45,20 +50,31 @@ export const updateUser = createAsyncThunk(
   }
 );
 
-export const deleteUser = createAsyncThunk("users/deleteUser", async (id) => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_USERS_URL}/${id}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  if (!res.ok) {
-    const errorData = await res.json();
-    throw new Error(errorData.message || "Failed to delete user");
+export const deleteUser = createAsyncThunk(
+  "users/deleteUser",
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/${id}.json`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to delete user");
+      }
+      localStorage.removeItem("userId");
+      return id;
+    } catch (error) {
+      console.error("Delete user error:", error);
+      return rejectWithValue(error.message || "Failed to delete user");
+    }
   }
-  localStorage.removeItem("userId");
-  return id;
-});
+);
 
 export const setUserId = createAsyncThunk("users/setUserId", async (id) => {
   if (id) {
@@ -95,7 +111,7 @@ const usersSlice = createSlice({
       })
       .addCase(fetchUsers.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.users = action.payload;
+        state.users = Object.values(action.payload || {});
       })
       .addCase(fetchUsers.rejected, (state, action) => {
         state.status = "failed";
@@ -110,7 +126,7 @@ const usersSlice = createSlice({
       })
       .addCase(fetchUser.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.error.message;
+        state.error = action.payload || action.error.message;
       })
       .addCase(updateUser.pending, (state) => {
         state.status = "loading";
@@ -121,7 +137,7 @@ const usersSlice = createSlice({
       })
       .addCase(updateUser.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.error.message;
+        state.error = action.payload || action.error.message;
       })
       .addCase(deleteUser.fulfilled, (state) => {
         state.currentUser = null;
@@ -129,7 +145,8 @@ const usersSlice = createSlice({
       })
       .addCase(deleteUser.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.error.message;
+        state.error = action.payload || action.error.message;
+        localStorage.removeItem("userId");
       })
       .addCase(setUserId.fulfilled, (state, action) => {
         state.userId = action.payload;

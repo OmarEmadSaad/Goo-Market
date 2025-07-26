@@ -21,6 +21,7 @@ const Profile = () => {
   const { userId, currentUser, status, error } = useSelector(
     (state) => state.users
   );
+  const authUserId = useSelector((state) => state.auth.userId); // جلب userId من auth slice
   const [editing, setEditing] = useState(false);
   const [editedUser, setEditedUser] = useState({
     name: "",
@@ -31,37 +32,42 @@ const Profile = () => {
   const [imageFile, setImageFile] = useState(null);
   const [previewURL, setPreviewURL] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [loadingUser, setLoadingUser] = useState(true);
 
   useEffect(() => {
-    const storedUserId = localStorage.getItem("userId");
-    if (storedUserId && storedUserId !== userId) {
-      dispatch(setUserId(storedUserId));
-    } else if (!storedUserId && !userId) {
-      Swal.fire({
-        icon: "error",
-        title: "No user logged in",
-        text: "Please log in to view your profile.",
-      });
-      router.push("/login");
-    }
-  }, [userId, dispatch, router]);
-
-  useEffect(() => {
-    if (userId) {
-      dispatch(fetchUser(userId));
+    const persistedState = localStorage.getItem("__persist");
+    if (persistedState) {
+      const parsedState = JSON.parse(persistedState);
+      const savedUserId = parsedState.auth?.userId || parsedState.users?.userId;
+      if (savedUserId && savedUserId !== authUserId) {
+        dispatch(setUserId(savedUserId));
+      } else if (!savedUserId && !authUserId) {
+        setLoadingUser(false);
+        Swal.fire({
+          icon: "error",
+          title: "No user logged in",
+          text: "Please log in to view your profile.",
+        }).then(() => {
+          router.push("/login");
+        });
+      } else {
+        setLoadingUser(false);
+      }
     } else {
-      setEditedUser({
-        name: "",
-        email: "",
-        password: "",
-        photo: null,
-      });
-      setPreviewURL(DEFAULT_IMAGE);
+      setLoadingUser(false);
     }
-  }, [userId, dispatch]);
+  }, [authUserId, dispatch, router]);
 
   useEffect(() => {
-    if (currentUser) {
+    if ((userId || authUserId) && !loadingUser) {
+      dispatch(fetchUser(userId || authUserId)).then(() => {
+        setLoadingUser(false);
+      });
+    }
+  }, [userId, authUserId, dispatch, loadingUser]);
+
+  useEffect(() => {
+    if (currentUser && !loadingUser) {
       const userPhoto = currentUser.image || DEFAULT_IMAGE;
       setEditedUser({
         name: currentUser.userName || "",
@@ -70,11 +76,19 @@ const Profile = () => {
         photo: userPhoto,
       });
       setPreviewURL(userPhoto);
+    } else if (!loadingUser) {
+      setEditedUser({
+        name: "",
+        email: "",
+        password: "",
+        photo: null,
+      });
+      setPreviewURL(DEFAULT_IMAGE);
     }
-  }, [currentUser]);
+  }, [currentUser, loadingUser]);
 
   useEffect(() => {
-    if (error && status === "failed") {
+    if (error && status === "failed" && !loadingUser) {
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -88,7 +102,7 @@ const Profile = () => {
       });
       setPreviewURL(DEFAULT_IMAGE);
     }
-  }, [error, status]);
+  }, [error, status, loadingUser]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -174,7 +188,9 @@ const Profile = () => {
         ...updatedFields,
       };
 
-      await dispatch(updateUser({ id: userId, userData: mergedData })).unwrap();
+      await dispatch(
+        updateUser({ id: userId || authUserId, userData: mergedData })
+      ).unwrap();
 
       Swal.fire({
         icon: "success",
@@ -201,7 +217,7 @@ const Profile = () => {
 
     if (result.isConfirmed) {
       try {
-        await dispatch(deleteUser(userId)).unwrap();
+        await dispatch(deleteUser(userId || authUserId)).unwrap();
         dispatch(logout());
         Swal.fire({
           icon: "success",
@@ -217,6 +233,8 @@ const Profile = () => {
       }
     }
   };
+
+  if (loadingUser) return <div className="text-center">Loading...</div>;
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4 dark:bg-[#03001C] dark:text-white">

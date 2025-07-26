@@ -78,7 +78,6 @@ const AddProducts = () => {
 
     return form.image;
   };
-
   const handleAddProduct = async () => {
     const { category, name, price, stock } = form;
 
@@ -103,20 +102,24 @@ const AddProducts = () => {
         image: imageUrl,
       };
 
-      const response = await fetch(process.env.NEXT_PUBLIC_PRODUCT_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newProduct),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_PRODUCT_URL.replace(".json", "")}/${category
+          .trim()
+          .toLowerCase()}.json`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newProduct),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to add product");
       }
 
       await response.json();
-
       await dispatch(fetchProducts()).unwrap();
 
       Swal.fire({

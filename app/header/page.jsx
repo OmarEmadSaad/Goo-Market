@@ -51,7 +51,10 @@ const Header = () => {
   const cartItems = useSelector((state) => state.cart.cartItems);
   const cartCount = cartItems?.length || 0;
 
-  const currentUser = users.find((user) => user.id === userId);
+  const currentUser =
+    users && Array.isArray(users)
+      ? users.find((user) => user.id === userId)
+      : null;
 
   useEffect(() => {
     const savedId = localStorage.getItem("userId");
@@ -92,7 +95,6 @@ const Header = () => {
   const handleLogout = () => {
     dispatch(setUserId(null));
     dispatch(clearCart());
-
     router.push("/login");
   };
 
@@ -164,8 +166,8 @@ const Header = () => {
                 Dashboard
               </ListItem>
             )}
-            {allProducts.map((product) => (
-              <li key={product.id}>
+            {allProducts.map((product, index) => (
+              <li key={product.id || index}>
                 <span
                   onClick={() => {
                     router.push(

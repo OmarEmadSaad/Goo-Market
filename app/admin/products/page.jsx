@@ -16,7 +16,9 @@ const ProductsTable = () => {
   const { products, status, error, categories } = useSelector(
     (state) => state.products
   );
-  const urlProducts = process.env.NEXT_PUBLIC_PRODUCT_URL;
+
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+  const PRODUCT_URL = process.env.NEXT_PUBLIC_PRODUCT_URL;
 
   useEffect(() => {
     if (status === "idle") {
@@ -30,7 +32,7 @@ const ProductsTable = () => {
 
   const delProduct = async ({ name, id }) => {
     const result = await Swal.fire({
-      title: `Are you sure to delete ${name.slice(0, 5)}`,
+      title: `Are you sure to delete ${name.slice(0, 5)}...?`,
       text: "You won't be able to revert this!",
       icon: "warning",
       showCancelButton: true,
@@ -41,20 +43,50 @@ const ProductsTable = () => {
 
     if (result.isConfirmed) {
       try {
-        const res = await axios.delete(`${urlProducts}/${id}`);
-        if (res.status === 200) {
-          dispatch(fetchProducts());
-          Swal.fire("Deleted!", "The product has been deleted.", "success");
+        const res = await fetch(`${PRODUCT_URL}`);
+        const data = await res.json();
+
+        let productKey = null;
+
+        for (const categoryKey in data) {
+          const categoryProducts = data[categoryKey];
+          const foundEntry = Object.entries(categoryProducts || {}).find(
+            ([, value]) => value.id === id
+          );
+          if (foundEntry) {
+            productKey = {
+              category: categoryKey,
+              key: foundEntry[0],
+            };
+            break;
+          }
         }
+
+        if (!productKey) {
+          Swal.fire("Error!", "Product not found.", "error");
+          return;
+        }
+
+        const deleteRes = await fetch(
+          `${BASE_URL}/products/${productKey.category}/${productKey.key}.json`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        if (!deleteRes.ok) throw new Error("Failed to delete");
+
+        dispatch(fetchProducts());
+        Swal.fire("Deleted!", "The product has been deleted.", "success");
       } catch (error) {
         Swal.fire("Error!", "Failed to delete the product.", "error");
       }
     }
   };
 
-  const allProducts = categories.flatMap(
-    (category) => products[category] || []
-  );
+  const allProducts = categories
+    .flatMap((category) => products[category] || [])
+    .filter((product) => product?.id);
 
   return (
     <div className="min-h-screen w-full mt-3">
@@ -103,7 +135,7 @@ const ProductsTable = () => {
                     : "p-4 border-b border-blue-gray-50";
 
                   return (
-                    <tr key={id}>
+                    <tr key={id || index}>
                       <td className={classes}>
                         <Avatar src={image} alt={name} loading="lazy" />
                       </td>

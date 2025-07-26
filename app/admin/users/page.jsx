@@ -2,10 +2,11 @@
 
 import { Card, Typography, Button } from "@material-tailwind/react";
 import Swal from "sweetalert2";
-import axios from "axios";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import Loading from "@/app/loding/page";
+import { ref, update, get } from "firebase/database";
+import { db } from "@/firebase/config";
 
 const TABLE_HEAD = [
   "Avatar",
@@ -28,18 +29,17 @@ const UsersTable = () => {
     setError(null);
     try {
       const currentUserId = Cookies.get("auth-token");
-      const response = await axios.get(urlUser);
-      const data = Array.isArray(response.data)
-        ? response.data
-        : response.data.users || [];
+      const response = await fetch(urlUser);
+      const data = await response.json();
+      const dataArray = Object.values(data || {});
 
-      if (data.length === 0) {
+      if (dataArray.length === 0) {
         setError("No users found in API response.");
         setUsers([]);
         return;
       }
 
-      const filteredUsers = data.filter((user) => {
+      const filteredUsers = dataArray.filter((user) => {
         return String(user.id) !== String(currentUserId) && user.id !== 1;
       });
 
@@ -72,13 +72,26 @@ const UsersTable = () => {
     getUsers();
   }, []);
 
-  const makeAdmin = async (id) => {
-    if (!id) {
+  const makeAdmin = async (userId) => {
+    if (!userId) {
       Swal.fire("Error", "Invalid user ID", "error");
       return;
     }
     try {
-      await axios.patch(`${urlUser}/${id}`, { role: "admin" });
+      const usersRef = ref(db, "users");
+      const snapshot = await get(usersRef);
+      const usersData = snapshot.val() || {};
+
+      const key = Object.keys(usersData).find(
+        (k) => usersData[k].id === userId
+      );
+      if (!key) {
+        Swal.fire("Error", "User not found in database", "error");
+        return;
+      }
+
+      const userRef = ref(db, `users/${key}`);
+      await update(userRef, { role: "admin" });
       await getUsers();
       Swal.fire("Updated", "User has been promoted to Admin", "success");
     } catch (error) {
@@ -87,13 +100,26 @@ const UsersTable = () => {
     }
   };
 
-  const demoteToUser = async (id) => {
-    if (!id) {
+  const demoteToUser = async (userId) => {
+    if (!userId) {
       Swal.fire("Error", "Invalid user ID", "error");
       return;
     }
     try {
-      await axios.patch(`${urlUser}/${id}`, { role: "user" });
+      const usersRef = ref(db, "users");
+      const snapshot = await get(usersRef);
+      const usersData = snapshot.val() || {};
+
+      const key = Object.keys(usersData).find(
+        (k) => usersData[k].id === userId
+      );
+      if (!key) {
+        Swal.fire("Error", "User not found in database", "error");
+        return;
+      }
+
+      const userRef = ref(db, `users/${key}`);
+      await update(userRef, { role: "user" });
       await getUsers();
       Swal.fire("Updated", "User has been demoted to User", "success");
     } catch (error) {

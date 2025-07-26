@@ -12,10 +12,20 @@ export async function middleware(request) {
       return showAccessDeniedPage();
     }
 
-    const res = await fetch(`${USERS_URL}/${userId}`);
-    const user = await res.json();
+    try {
+      const res = await fetch(USERS_URL);
+      const data = await res.json();
+      const usersArray = Object.values(data);
 
-    if (!user || user.role !== "admin") {
+      const currentUser = usersArray.find((user) => user.id === userId);
+
+      if (!currentUser || currentUser.role !== "admin") {
+        return showAccessDeniedPage();
+      }
+
+      return NextResponse.next();
+    } catch (err) {
+      console.error("Error checking user role:", err);
       return showAccessDeniedPage();
     }
   }
@@ -105,10 +115,10 @@ function showAccessDeniedPage() {
             .card p {
               font-size: 0.95rem;
             }
-              
+
             .card img {
-            height: 280px;
-            object-fit: cover;
+              height: 280px;
+              object-fit: cover;
             }
 
             .btn {

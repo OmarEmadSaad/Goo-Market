@@ -79,40 +79,60 @@ const EditProducts = () => {
   const handleEdit = async () => {
     try {
       if (!id) throw new Error("No product ID provided");
-      let imageUrl = form.image;
-      if (form.image.startsWith("blob:")) {
-        throw new Error(
-          "File upload not implemented. Please provide an image URL."
-        );
+
+      if (!form.name || !form.category || !form.image) {
+        throw new Error("Please fill in all required fields.");
       }
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_PRODUCT_URL}/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: form.name,
-          price: parseFloat(form.price) || 0,
-          category: form.category,
-          stock: parseInt(form.stock) || 0,
-          image: imageUrl || "",
-        }),
-      });
+      if (form.image.startsWith("blob:")) {
+        throw new Error("File upload not implemented. Use image URL.");
+      }
 
-      if (!res.ok) throw new Error(`Failed to update: ${res.statusText}`);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/products.json`
+      );
+      const productsData = await response.json();
 
-      await res.json();
+      if (!Array.isArray(productsData))
+        throw new Error("Invalid products format");
+
+      const index = productsData.findIndex((p) => p.id === id);
+      if (index === -1) throw new Error("Product not found in the list");
+
+      productsData[index] = {
+        id,
+        name: form.name,
+        price: parseFloat(form.price) || 0,
+        category: form.category,
+        stock: parseInt(form.stock) || 0,
+        image: form.image,
+      };
+
+      const updateRes = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/products.json`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(productsData),
+        }
+      );
+
+      if (!updateRes.ok) throw new Error("Failed to update product");
+
       dispatch(fetchProducts());
+
       Swal.fire({
         icon: "success",
         title: "Product updated successfully!",
         showConfirmButton: false,
         timer: 1500,
       });
+
       setTimeout(() => {
         router.push("/admin/products");
-      }, 150);
+      }, 500);
     } catch (err) {
       console.error("Edit error:", err.message);
       Swal.fire({
@@ -175,7 +195,7 @@ const EditProducts = () => {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg flex flex-col gap-4 min-h-screen mt-5 mb-5 space-y-12 dark:bg-[#0B2447] ">
+    <div className="w-full max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg flex flex-col gap-4 min-h-screen mt-5 mb-5 space-y-12 dark:bg-[#0B2447]">
       <Input
         label="Product Name"
         type="text"
