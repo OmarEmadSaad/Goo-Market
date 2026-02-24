@@ -2,7 +2,7 @@ import { CarouselHome } from "./components/Carousel";
 import Home from "./home/page";
 export const metadata = {
   title: "GooMarket",
-  description: "TV Laptop fan",
+  description: "TV Laptop fan PC",
 };
 
 const App = () => {
