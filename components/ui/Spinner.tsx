@@ -7,7 +7,7 @@ export interface SpinnerProps {
 
 export default function Spinner({ className, label = "Loading" }: SpinnerProps) {
   return (
-    <span role="status" aria-live="polite" className="inline-flex items-center">
+    <span role="status" aria-live="polite" className="relative inline-flex items-center">
       <svg
         className={cn("h-6 w-6 animate-spin text-green-600", className)}
         viewBox="0 0 24 24"

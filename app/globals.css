@@ -67,7 +67,7 @@
      Framer Motion carousel with zero JavaScript, which also means the
      products inside it are present in the server-rendered HTML. */
   .gm-rail {
-    @apply flex gap-4 overflow-x-auto scroll-smooth pb-4 snap-x snap-mandatory;
+    @apply relative flex gap-4 overflow-x-auto scroll-smooth pb-4 snap-x snap-mandatory;
     scrollbar-width: thin;
   }
 

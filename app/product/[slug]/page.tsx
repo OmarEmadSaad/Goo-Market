@@ -141,7 +141,7 @@ export default async function ProductPage({ params }: PageProps) {
 
 function ProductGallery({ product }: { product: Product }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-[var(--gm-border)] bg-[var(--gm-surface)]">
+    <div className="overflow-hidden rounded-xl border border-[var(--gm-border)] bg-[var(--gm-surface)] lg:self-start">
       <ProductImage
         product={product}
         ratio="square"

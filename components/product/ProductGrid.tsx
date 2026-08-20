@@ -10,7 +10,8 @@ export interface ProductGridProps {
   ariaLabel?: string;
 }
 
-const GRID_SIZES = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw";
+const GRID_SIZES =
+  "(max-width: 640px) 50vw, (max-width: 1280px) 33vw, (max-width: 1536px) 25vw, 20vw";
 
 export default function ProductGrid({
   products,
@@ -25,7 +26,7 @@ export default function ProductGrid({
     <ul
       aria-label={ariaLabel}
       className={cn(
-        "grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:gap-6",
+        "grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4 xl:gap-6 2xl:grid-cols-5",
         className
       )}
     >

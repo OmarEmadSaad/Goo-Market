@@ -40,7 +40,7 @@ export default async function HomePage() {
         <h2 id="categories-heading" className="mb-4 text-xl font-semibold">
           Shop by category
         </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {categories.map((category) => (
             <CategoryCard key={category.slug} category={category} />
           ))}

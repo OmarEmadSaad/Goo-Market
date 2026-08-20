@@ -30,7 +30,7 @@ export default function ProductPrice({
   const styles = SIZES[size];
 
   return (
-    <p className={cn("flex flex-wrap items-baseline gap-x-2 gap-y-0.5", className)}>
+    <p className={cn("relative flex flex-wrap items-baseline gap-x-2 gap-y-0.5", className)}>
       <span className={cn("text-green-700 dark:text-green-400", styles.now)}>
         {formatPrice(now)}
       </span>

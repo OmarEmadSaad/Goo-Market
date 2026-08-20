@@ -1,7 +1,8 @@
 import ProductCard from "./ProductCard";
 import type { Product } from "@/lib/types";
 
-const RAIL_SIZES = "(max-width: 640px) 60vw, (max-width: 1024px) 33vw, 20rem";
+const RAIL_SIZES =
+  "(max-width: 640px) 60vw, (max-width: 1280px) 30vw, 18rem";
 
 export interface ProductRailProps {
   products: readonly Product[];
@@ -24,7 +25,10 @@ export default function ProductRail({
       role="list"
     >
       {products.map((product, index) => (
-        <li key={product.id} className="w-[60vw] max-w-[18rem] sm:w-64 lg:w-72">
+        <li
+          key={product.id}
+          className="w-[62vw] max-w-[17rem] sm:w-60 lg:w-64 xl:w-72"
+        >
           <ProductCard
             product={product}
             priority={index < priorityCount}

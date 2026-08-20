@@ -3,7 +3,7 @@ import { cn } from "@/lib/cn";
 
 const WIDTHS = {
   narrow: "max-w-3xl",
-  default: "max-w-7xl",
+  default: "max-w-7xl 2xl:max-w-[87.5rem]",
   wide: "max-w-screen-2xl",
 } as const;
 

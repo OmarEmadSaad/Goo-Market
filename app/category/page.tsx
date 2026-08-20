@@ -43,7 +43,7 @@ export default async function CategoryIndexPage() {
           description="Products will appear here as soon as the catalog is populated."
         />
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {categories.map((category) => (
             <li key={category.slug}>
               <CategoryCard category={category} />
