@@ -1,7 +1,12 @@
 import "server-only";
 
 import { cache } from "react";
-import { dbRead } from "./db";
+import {
+  DatabaseError,
+  dbRead,
+  describeDatabaseError,
+  getDatabase,
+} from "./db";
 import {
   collectCategories,
   getRelatedProducts,
@@ -16,19 +21,41 @@ export const PRODUCTS_TAG = "products";
 const REVALIDATE_SECONDS = 300;
 
 export const getProducts = cache(async (): Promise<Product[]> => {
+  let raw: unknown;
+
   try {
-    const raw = await dbRead("products", {
+    raw = await dbRead("products", {
       revalidate: REVALIDATE_SECONDS,
       tags: [PRODUCTS_TAG],
     });
-    return normalizeProducts(raw);
   } catch (error) {
-    console.error(
-      "[catalog] failed to load products:",
-      error instanceof Error ? error.message : error
-    );
-    return [];
+    console.error(`[catalog] products read FAILED ${describeDatabaseError(error)}`);
+    throw error;
   }
+
+  if (raw === null || raw === undefined) {
+    const message =
+      'The "products" node is empty or missing. Check the database URL and that /products exists.';
+    console.error(`[catalog] products read EMPTY code=NO_DATA message=${message}`);
+    throw new DatabaseError("NOT_FOUND", message, { path: "products" });
+  }
+
+  const products = normalizeProducts(raw);
+
+  if (products.length === 0) {
+    const shape = Array.isArray(raw) ? `array(${raw.length})` : typeof raw;
+    const keys =
+      raw && typeof raw === "object" ? Object.keys(raw).slice(0, 5).join(",") : "";
+    const message = `The "products" node returned data but no record survived normalisation. shape=${shape} keys=${keys}`;
+    console.error(`[catalog] products read UNUSABLE code=BAD_SHAPE message=${message}`);
+    throw new DatabaseError("PARSE_ERROR", message, { path: "products" });
+  }
+
+  console.info(
+    `[catalog] products read OK count=${products.length} source=${getDatabase().source}`
+  );
+
+  return products;
 });
 
 export const getCategories = cache(async (): Promise<Category[]> => {

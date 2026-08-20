@@ -37,17 +37,60 @@ See `.env.example`. The split matters:
 - `NEXT_PUBLIC_CLOUD_NAME` / `NEXT_PUBLIC_UPLOAD_PRESET` are public by design (unsigned Cloudinary
   uploads happen from the browser).
 
+## Data source
+
+Products come from the Firebase Realtime Database `/products` node, read server-side over the REST
+API by `lib/server/db.ts`. There is no mock data, no seed file and no fallback catalog anywhere in
+the project — if Firebase is unreachable the build fails and pages error rather than rendering an
+empty store.
+
+The database root is resolved from the first of these that is set:
+
+1. `FIREBASE_DB_URL` — preferred, server-only
+2. `NEXT_PUBLIC_BASE_URL`
+3. `NEXT_PUBLIC_FIREBASE_DATABASE_URL`
+4. `NEXT_PUBLIC_PRODUCT_URL` — root derived by stripping `/products.json`
+5. `NEXT_PUBLIC_USERS_URL` — root derived by stripping `/users.json`
+
+The legacy `NEXT_PUBLIC_*` names are supported so an existing deployment keeps working. They are
+read only inside a `server-only` module, so they are never inlined into the client bundle.
+
+### Checking the connection
+
+```bash
+# Live Firebase check: connection, payload, mapping, field coverage
+VERIFY_FIREBASE=1 npm run verify:firebase
+
+# Or against any running instance, including a deployment
+curl https://<your-app>/api/health/catalog
+```
+
+The health endpoint reports which env var supplied the URL, the product and category counts, and
+on failure a classified error code (`MISSING_CONFIG`, `INVALID_URL`, `NETWORK`, `AUTH`,
+`PERMISSION_DENIED`, `NOT_FOUND`, `BAD_STATUS`, `PARSE_ERROR`).
+
 ## Deploying
 
 `.env` is gitignored, so the host has no environment variables until you add them. On Vercel:
-*Project → Settings → Environment Variables*, add all five from `.env.example`, then redeploy.
+*Project → Settings → Environment Variables*, set them for **Production, Preview and Development**,
+then redeploy.
 
-If `FIREBASE_DB_URL` is missing the build still **succeeds** — it just ships an empty catalog and
-logs `[catalog] failed to load products: FIREBASE_DB_URL is not configured` for every page. Check
-the build log for that line if the deployed store looks empty.
+Required:
 
-`NEXT_PUBLIC_SITE_URL` must be the real production origin. It is baked into canonical URLs, Open
-Graph tags, `sitemap.xml` and JSON-LD at build time, so a wrong value ships wrong metadata.
+| Variable | Notes |
+| --- | --- |
+| `FIREBASE_DB_URL` | Or one of the legacy names above |
+| `AUTH_SECRET` | **New.** Login and registration fail without it |
+| `NEXT_PUBLIC_SITE_URL` | The real production origin |
+| `NEXT_PUBLIC_CLOUD_NAME` | Cloudinary |
+| `NEXT_PUBLIC_UPLOAD_PRESET` | Cloudinary |
+
+If no database URL is configured the build **fails** with
+`DatabaseError … code: 'MISSING_CONFIG'` naming every variable it looked for. That is deliberate:
+shipping a silently empty catalog is worse than a failed deploy.
+
+`NEXT_PUBLIC_SITE_URL` is baked into canonical URLs, Open Graph tags, `sitemap.xml` and JSON-LD at
+build time, so a wrong value ships wrong metadata site-wide.
 
 ## Structure
 
