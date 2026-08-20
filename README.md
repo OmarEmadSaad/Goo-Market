@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Goo-Market
 
-## Getting Started
+A Next.js 15 (App Router) e-commerce storefront in TypeScript. Electronics, home essentials and
+food, priced in EGP, backed by a Firebase Realtime Database.
 
-First, run the development server:
+## Getting started
 
 ```bash
+npm install
+cp .env.example .env      # then fill in the values
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Development server |
+| `npm run build` | Production build |
+| `npm run start` | Serve the production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm test` | Vitest |
+| `npm run test:coverage` | Vitest with a coverage report |
+| `npm run verify` | typecheck → lint → test → build |
 
-## Learn More
+## Environment
 
-To learn more about Next.js, take a look at the following resources:
+See `.env.example`. The split matters:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `FIREBASE_DB_URL`, `FIREBASE_DB_AUTH`, `AUTH_SECRET` are **server-only**. They must never gain a
+  `NEXT_PUBLIC_` prefix — that would inline them into the client bundle.
+- `NEXT_PUBLIC_SITE_URL` drives canonical URLs, Open Graph tags, the sitemap and JSON-LD. Set it to
+  the real production origin or the structured data will point at localhost.
+- `NEXT_PUBLIC_CLOUD_NAME` / `NEXT_PUBLIC_UPLOAD_PRESET` are public by design (unsigned Cloudinary
+  uploads happen from the browser).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Structure
 
-## Deploy on Vercel
+```
+app/
+  layout.tsx              root layout: header, footer, providers, site-wide JSON-LD
+  page.tsx                home (Server Component)
+  category/               category hub and /category/[slug]
+  product/[slug]/         product detail; legacy /product/<id> 308s to the slug
+  search/                 server-side search, filter, sort, pagination
+  cart/ login/ register/ profile/ forbidden/
+  admin/                  dashboard, product CRUD, user roles
+  api/                    auth, cart, checkout, account, admin mutations
+  robots.ts sitemap.ts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+components/
+  layout/                 Header, Footer, BrowseMenu, SearchForm, CartLink, AccountMenu, ThemeToggle
+  product/                ProductCard, ProductGrid, ProductRail, ProductImage, ProductPrice,
+                          ProductBadge, CategoryCard, CategoryFilter, SortSelect
+  cart/                   CartProvider, CartContents, CartItemRow, CartSummary,
+                          QuantitySelector, AddToCartButton
+  ui/                     Button, Container, Field, Drawer, Toast, Pagination, Breadcrumbs,
+                          Skeleton, Spinner, States
+  seo/JsonLd.tsx
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+lib/
+  catalog.ts              normalising, searching, sorting, paginating (pure)
+  pricing.ts              discount, tax, cart totals, formatting (pure)
+  types.ts site.ts cn.ts upload.ts session.ts
+  seo/jsonld.ts           structured data builders
+  server/                 server-only: db, products, users, cart, session, password,
+                          validation, rate-limit, admin, product-admin
+
+tests/                    Vitest + Testing Library
+```
+
+## Architecture rules
+
+**The server owns money, stock and identity.** The cart API accepts only `{id, quantity}`; names,
+images, prices and stock are looked up from the catalog on every read and write, and checkout
+recomputes the total before clearing the cart. `lib/pricing.ts` is the single source of truth for
+every displayed and charged number.
+
+**Server Components by default.** `"use client"` appears only where there is real interaction:
+the cart store, the menu drawer, the toast host, the theme toggle, form submissions and the admin
+row actions. Everything a crawler or an answer engine needs — product names, prices, availability,
+categories, breadcrumbs, internal links, JSON-LD — is in the server-rendered HTML.
+
+**Caching is split by ownership.** The catalog is public, so `lib/server/products.ts` wraps it in
+`React.cache` (per-request dedup) plus `next: { revalidate: 300, tags: ["products"] }` (shared
+across requests, invalidated on admin writes). Cart, session and account reads use `cache: "no-store"`
+and their routes are `force-dynamic`, so per-user data never lands in a shared cache.
+
+**No fabricated data.** The catalog stores `category, id, image, name, price, stock`. Nothing else
+is invented — no brand, no rating, no reviews — and structured data emits only what the record
+genuinely carries.
+
+## Testing
+
+```bash
+npm test
+```
+
+210 tests across pricing, catalog, server cart, client cart, sessions, passwords, validation,
+structured data and the reusable components.
+
+## Security
+
+See [SECURITY.md](SECURITY.md). It lists what was fixed and, importantly, the **Firebase database
+rules that still need to be locked down in the Firebase console** — the application no longer
+depends on them being open, but they are still open.

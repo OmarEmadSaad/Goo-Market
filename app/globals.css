@@ -1,3 +1,95 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * Design tokens. These mirror the colours the project already used
+ * (green-600 chrome, #03001C page background, #0B2447 surfaces in dark mode)
+ * so the visual identity is unchanged - they are just named once instead of
+ * being repeated as `dark:bg-[#0B2447]` on every element.
+ */
+@layer base {
+  :root {
+    --gm-page: #ffffff;
+    --gm-surface: #ffffff;
+    --gm-text: #1f2937;
+    --gm-muted: #6b7280;
+    --gm-border: #e5e7eb;
+    --gm-brand: #16a34a;
+  }
+
+  .dark {
+    --gm-page: #03001c;
+    --gm-surface: #0b2447;
+    --gm-text: #ecfae5;
+    --gm-muted: #93b1a6;
+    --gm-border: rgba(236, 250, 229, 0.15);
+    --gm-brand: #22c55e;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--gm-page);
+    color: var(--gm-text);
+    font-synthesis-weight: none;
+  }
+
+  /* A visible, consistent focus ring for every interactive element. The old
+     inputs used `focus:outline-none` with no replacement, which left keyboard
+     users with no indication of where they were. */
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--gm-brand);
+    outline-offset: 2px;
+    border-radius: 0.25rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Horizontal, snap-scrolling product rail. Replaces the Swiper +
+     Framer Motion carousel with zero JavaScript, which also means the
+     products inside it are present in the server-rendered HTML. */
+  .gm-rail {
+    @apply flex gap-4 overflow-x-auto scroll-smooth pb-4 snap-x snap-mandatory;
+    scrollbar-width: thin;
+  }
+
+  .gm-rail > * {
+    @apply snap-start shrink-0;
+  }
+
+  .gm-skeleton {
+    @apply animate-pulse rounded bg-gray-200 dark:bg-white/10;
+  }
+}
+
+@layer utilities {
+  .gm-sr-only-focusable:not(:focus):not(:focus-within) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}
