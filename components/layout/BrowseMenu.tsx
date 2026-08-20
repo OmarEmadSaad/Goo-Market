@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import Drawer from "@/components/ui/Drawer";
 import { categoryPath, productPath } from "@/lib/catalog";
 import type { CategoryGroup, PublicUser } from "@/lib/types";
@@ -14,7 +14,7 @@ export default function BrowseMenu({
   user: PublicUser | null;
 }) {
   const [open, setOpen] = useState(false);
-  const close = () => setOpen(false);
+  const close = useCallback(() => setOpen(false), []);
 
   return (
     <>

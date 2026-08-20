@@ -22,20 +22,29 @@ export default function Drawer({
   const panelRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
 
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   useEffect(() => {
     if (!open) return;
 
     previouslyFocused.current = document.activeElement as HTMLElement | null;
-    const panel = panelRef.current;
-    focusables(panel)[0]?.focus();
+    focusables(panelRef.current)[0]?.focus({ preventScroll: true });
 
-    const { overflow } = document.body.style;
-    document.body.style.overflow = "hidden";
+    const root = document.documentElement;
+    const previousOverflow = root.style.overflow;
+    const previousPaddingRight = root.style.paddingRight;
+    const scrollbarWidth = window.innerWidth - root.clientWidth;
+
+    root.style.overflow = "hidden";
+    if (scrollbarWidth > 0) {
+      root.style.paddingRight = `${scrollbarWidth}px`;
+    }
 
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         event.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (event.key !== "Tab") return;
@@ -49,28 +58,30 @@ export default function Drawer({
 
       if (event.shiftKey && active === first) {
         event.preventDefault();
-        last.focus();
+        last.focus({ preventScroll: true });
       } else if (!event.shiftKey && active === last) {
         event.preventDefault();
-        first.focus();
+        first.focus({ preventScroll: true });
       }
     }
 
     document.addEventListener("keydown", onKeyDown);
+
     return () => {
       document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = overflow;
-      previouslyFocused.current?.focus();
+      root.style.overflow = previousOverflow;
+      root.style.paddingRight = previousPaddingRight;
+      previouslyFocused.current?.focus({ preventScroll: true });
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-50 overscroll-contain">
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
+        onClick={() => onCloseRef.current()}
         aria-hidden="true"
       />
       <div
@@ -87,7 +98,7 @@ export default function Drawer({
           <h2 className="text-lg font-semibold">{title}</h2>
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => onCloseRef.current()}
             className="rounded-md p-2 hover:bg-black/5 dark:hover:bg-white/10"
             aria-label={`Close ${title}`}
           >
