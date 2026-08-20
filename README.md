@@ -37,6 +37,18 @@ See `.env.example`. The split matters:
 - `NEXT_PUBLIC_CLOUD_NAME` / `NEXT_PUBLIC_UPLOAD_PRESET` are public by design (unsigned Cloudinary
   uploads happen from the browser).
 
+## Deploying
+
+`.env` is gitignored, so the host has no environment variables until you add them. On Vercel:
+*Project → Settings → Environment Variables*, add all five from `.env.example`, then redeploy.
+
+If `FIREBASE_DB_URL` is missing the build still **succeeds** — it just ships an empty catalog and
+logs `[catalog] failed to load products: FIREBASE_DB_URL is not configured` for every page. Check
+the build log for that line if the deployed store looks empty.
+
+`NEXT_PUBLIC_SITE_URL` must be the real production origin. It is baked into canonical URLs, Open
+Graph tags, `sitemap.xml` and JSON-LD at build time, so a wrong value ships wrong metadata.
+
 ## Structure
 
 ```
